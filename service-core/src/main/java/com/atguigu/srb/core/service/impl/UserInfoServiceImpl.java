@@ -76,4 +76,16 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     }
 
 
+    @Override
+    public void lock(Long id, Integer status) {
+        //        UserInfo userInfo = this.getById(id);//select
+        //        userInfo.setStatus(1);
+        //        this.updateById(userInfo);//update
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(id);
+        userInfo.setStatus(status);
+        baseMapper.updateById(userInfo);
+    }
+
+
 }
