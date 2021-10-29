@@ -1,10 +1,17 @@
 package com.atguigu.srb.core.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.atguigu.srb.core.listener.ExcelDictDTOListener;
+import com.atguigu.srb.core.pojo.dto.ExcelDictDTO;
 import com.atguigu.srb.core.pojo.entity.Dict;
 import com.atguigu.srb.core.mapper.DictMapper;
 import com.atguigu.srb.core.service.DictService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.InputStream;
 
 /**
  * <p>
@@ -15,6 +22,13 @@ import org.springframework.stereotype.Service;
  * @since 2021-10-28
  */
 @Service
+@Slf4j
 public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements DictService {
 
+    @Transactional(rollbackFor = Exception.class)   // 事务
+    @Override
+    public void importData(InputStream inputStream) {
+        EasyExcel.read(inputStream, ExcelDictDTO.class,new ExcelDictDTOListener(baseMapper)).sheet().doRead();
+        log.info("Excel 导入成功");
+    }
 }
