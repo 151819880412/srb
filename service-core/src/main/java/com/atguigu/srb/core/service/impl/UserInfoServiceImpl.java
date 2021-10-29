@@ -87,5 +87,13 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         baseMapper.updateById(userInfo);
     }
 
+    @Override
+    public boolean checkMobile(String mobile) {
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.eq("mobile",mobile);
+        Integer count = baseMapper.selectCount(userInfoQueryWrapper);
+        return count > 0;
+    }
+
 
 }

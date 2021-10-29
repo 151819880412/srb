@@ -53,4 +53,11 @@ public class UserInfoController {
         userInfoService.register(registerVO);
         return R.ok().message("注册成功");
     }
+
+    @ApiOperation("检验手机号是否注册")
+    @GetMapping("/checkMobile/{mobile}")
+    public boolean checkMoblie(@PathVariable String mobile){
+        return userInfoService.checkMobile(mobile);
+    }
+
 }
