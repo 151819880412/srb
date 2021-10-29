@@ -9,13 +9,17 @@ import com.atguigu.srb.core.service.DictService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -34,6 +38,8 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
      * private DictMapper dictMapper;
      * 如果要注入的 Mapper 就是当前 service 下的 Mapper name就可以不用写 @Resource 直接写 baseMapper
      */
+    @Resource
+    private RedisTemplate redisTemplate;
 
     @Transactional(rollbackFor = Exception.class)   // 事务
     @Override
@@ -59,12 +65,42 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
 
     @Override
     public List<Dict> listByParentId(Long parentId) {
-        List<Dict> dictList = baseMapper.selectList(new QueryWrapper<Dict>().eq("parent_id", parentId));
+
+        // 首先查询 redis 中是否存在数据列表
+        try {
+            log.info("从redis中获取数据");
+            List<Dict> distList = (List<Dict>)redisTemplate.opsForValue().get("srv:core:dictList:"+parentId);
+            if(distList!=null){
+                return distList;
+            }
+        } catch (Exception e) {
+            // e.printStackTrace();
+            log.error("redis服务器异常" + ExceptionUtils.getStackTrace(e));
+        }
+        // 如果存在则从 redis 中直接返回数据列表
+
+        // 如果不存在才查询数据库
+        log.info("从数据库中获取数据");
+        QueryWrapper<Dict> dictQueryWrapper = new QueryWrapper<>();
+        dictQueryWrapper.eq("parent_id",parentId);
+        List<Dict> dictList = baseMapper.selectList(dictQueryWrapper);
+        // 填充 hashChildren
         dictList.forEach(dict -> {
-            //如果有子节点，则是非叶子节点
+            // 判断当前节点是否有子节点,找到当前 dict 下级有没有子节点
             boolean hasChildren = this.hasChildren(dict.getId());
             dict.setHasChildren(hasChildren);
         });
+
+        // 将数据存入 redis
+        try {
+            log.info("将数据存入redis");
+            redisTemplate.opsForValue().set("srb.core:dictListL"+parentId,dictList,5, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            // e.printStackTrace();
+            log.error("redis服务器异常" + ExceptionUtils.getStackTrace(e));
+        }
+
+        // 返回数据列表
         return dictList;
     }
 
