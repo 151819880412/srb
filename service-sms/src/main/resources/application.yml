@@ -31,6 +31,12 @@ feign:
       default:
         connectTimeout: 10000 #连接超时配置
         readTimeout: 600000 #执行超时配置
+
+#开启Feign对Sentinel的支持
+#feign:
+  sentinel:
+    enabled: true
+
 logging:
   level:
     com.atguigu.srb.sms.client.CoreUserInfoClient: DEBUG #以什么级别监控哪个接口
