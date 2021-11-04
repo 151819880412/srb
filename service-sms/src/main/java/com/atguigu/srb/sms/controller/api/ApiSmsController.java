@@ -58,7 +58,7 @@ public class ApiSmsController {
         //组装短信模板参数
         Map<String,Object> param = new HashMap<>();
         param.put("code", code);
-        //发送短信
+        //发送短信  没有阿里云短信服务，所以展示注释掉
 //        smsService.send(mobile, SmsProperties.TEMPLATE_CODE, param);
 
         //将验证码存入redis
