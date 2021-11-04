@@ -10,6 +10,7 @@ import com.atguigu.srb.core.pojo.entity.BorrowerAttach;
 import com.atguigu.srb.core.pojo.entity.UserInfo;
 import com.atguigu.srb.core.pojo.vo.BorrowerVO;
 import com.atguigu.srb.core.service.BorrowerService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -61,5 +62,19 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
         userInfo.setBindStatus(BorrowAuthEnum.AUTH_RUN.getStatus());
         userInfoMapper.updateById(userInfo);
 
+    }
+
+    @Override
+    public Integer getStatusByUserId(Long userId) {
+
+        QueryWrapper<Borrower> borrowerQueryWrapper = new QueryWrapper<>();
+        borrowerQueryWrapper.select("status").eq("user_id",userId);
+        List<Object> objects = baseMapper.selectObjs(borrowerQueryWrapper);
+        if(objects.size() == 0){
+            return BorrowAuthEnum.NO_AUTH.getStatus();
+        }
+
+        Integer status = (Integer) objects.get(0);
+        return status;
     }
 }
