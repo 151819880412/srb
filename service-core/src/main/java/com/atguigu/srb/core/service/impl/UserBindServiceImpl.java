@@ -1,20 +1,25 @@
 package com.atguigu.srb.core.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.atguigu.common.exception.Assert;
 import com.atguigu.common.result.ResponseEnum;
 import com.atguigu.srb.core.enums.UserBindEnum;
 import com.atguigu.srb.core.hfb.FormHelper;
 import com.atguigu.srb.core.hfb.HfbConst;
 import com.atguigu.srb.core.hfb.RequestHelper;
+import com.atguigu.srb.core.mapper.UserInfoMapper;
 import com.atguigu.srb.core.pojo.entity.UserBind;
 import com.atguigu.srb.core.mapper.UserBindMapper;
+import com.atguigu.srb.core.pojo.entity.UserInfo;
 import com.atguigu.srb.core.pojo.vo.UserBindVO;
 import com.atguigu.srb.core.service.UserBindService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +33,9 @@ import java.util.Map;
  */
 @Service
 public class UserBindServiceImpl extends ServiceImpl<UserBindMapper, UserBind> implements UserBindService {
+
+    @Resource
+    private UserInfoMapper userInfoMapper;
 
     @Override
     public String commitBindUser(UserBindVO userBindVO, Long userId) {
@@ -78,4 +86,32 @@ public class UserBindServiceImpl extends ServiceImpl<UserBindMapper, UserBind> i
         return formStr;
 
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void notify(Map<String, Object> paramMap) {
+
+        String bindCode = (String) paramMap.get("bindCode");
+        String agentUserId =(String) paramMap.get("agentUserId");
+
+        // 根据user_id查询user_bind记录
+        QueryWrapper<UserBind> userBindQueryWrapper = new QueryWrapper<>();
+        userBindQueryWrapper.eq("user_id",agentUserId);
+
+        // 更新用户绑定表
+        UserBind userBind = baseMapper.selectOne(userBindQueryWrapper);
+        userBind.setBindCode(bindCode);
+        userBind.setStatus(UserBindEnum.BIND_OK.getStatus());
+        baseMapper.updateById(userBind);
+
+        // 更新用户表
+        UserInfo userInfo = userInfoMapper.selectById(agentUserId);
+        userInfo.setBindCode(bindCode);
+        userInfo.setName(userBind.getName());
+        userInfo.setIdCard(userBind.getIdCard());
+        userInfo.setBindStatus(userBind.getStatus());
+        userInfoMapper.updateById(userInfo);
+
+    }
+
 }
