@@ -8,8 +8,12 @@ import com.atguigu.srb.core.pojo.entity.Borrower;
 import com.atguigu.srb.core.mapper.BorrowerMapper;
 import com.atguigu.srb.core.pojo.entity.BorrowerAttach;
 import com.atguigu.srb.core.pojo.entity.UserInfo;
+import com.atguigu.srb.core.pojo.vo.BorrowerAttachVO;
+import com.atguigu.srb.core.pojo.vo.BorrowerDetailVO;
 import com.atguigu.srb.core.pojo.vo.BorrowerVO;
+import com.atguigu.srb.core.service.BorrowerAttachService;
 import com.atguigu.srb.core.service.BorrowerService;
+import com.atguigu.srb.core.service.DictService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -37,6 +41,12 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
 
     @Resource
     private BorrowerAttachMapper borrowerAttachMapper;
+
+    @Resource
+    private DictService dictService;
+
+    @Resource
+    private BorrowerAttachService borrowerAttachService;
 
     @Override
     public void saveBorrowerVOByUserId(BorrowerVO borrowerVO, Long userId) {
@@ -95,6 +105,39 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
                 .or().like("mobile", keyword)
                 .orderByDesc("id");
         return baseMapper.selectPage(pageParam, borrowerQueryWrapper);
+    }
+
+    @Override
+    public BorrowerDetailVO getBorrowerDetailVOById(Long id) {
+
+        // 获取借款人信息
+        Borrower borrower = baseMapper.selectById(id);
+
+        // 获取填充人信息
+        BorrowerDetailVO borrowerDetailVO = new BorrowerDetailVO();
+        BeanUtils.copyProperties(borrower,borrowerDetailVO);
+
+        // 婚否
+        borrowerDetailVO.setMarry(borrower.getMarry()?"是":"否");
+        // 性别
+        borrowerDetailVO.setSex(borrower.getSex()==1?"男":"女");
+
+        // 下拉列表
+        borrowerDetailVO.setEducation(dictService.getNameByParentDictCodeAndValue("education", borrower.getEducation()));
+        borrowerDetailVO.setIndustry(dictService.getNameByParentDictCodeAndValue("moneyUse", borrower.getIndustry()));
+        borrowerDetailVO.setIncome(dictService.getNameByParentDictCodeAndValue("income", borrower.getIncome()));
+        borrowerDetailVO.setReturnSource(dictService.getNameByParentDictCodeAndValue("returnSource", borrower.getReturnSource()));
+        borrowerDetailVO.setContactsRelation(dictService.getNameByParentDictCodeAndValue("relation", borrower.getContactsRelation()));
+
+        // 审批状态
+        String status = BorrowerStatusEnum.getMsgByStatus(borrower.getStatus());
+        borrowerDetailVO.setStatus(status);
+
+        // 获取附件VO列表
+        List<BorrowerAttachVO> borrowerAttachVOList =  borrowerAttachService.selectBorrowerAttachVOList(id);
+        borrowerDetailVO.setBorrowerAttachVOList(borrowerAttachVOList);
+
+        return borrowerDetailVO;
     }
 
 }

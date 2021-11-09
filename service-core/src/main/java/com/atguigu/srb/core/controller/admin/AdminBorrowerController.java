@@ -2,6 +2,7 @@ package com.atguigu.srb.core.controller.admin;
 
 import com.atguigu.common.result.R;
 import com.atguigu.srb.core.pojo.entity.Borrower;
+import com.atguigu.srb.core.pojo.vo.BorrowerDetailVO;
 import com.atguigu.srb.core.service.BorrowerService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -22,6 +23,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/admin/core/borrower")
 @Slf4j
+@CrossOrigin
 public class AdminBorrowerController {
 
     @Resource
@@ -44,5 +46,14 @@ public class AdminBorrowerController {
         Page<Borrower> pageParam = new Page<>(page, limit);
         IPage<Borrower> pageModel = borrowerService.listPage(pageParam, keyword);
         return R.ok().data("pageModel", pageModel);
+    }
+
+    @ApiOperation("获取借款人信息")
+    @GetMapping("/show/{id}")
+    public R shwo(
+            @ApiParam(value = "借款人id",required = true)
+            @PathVariable Long id){
+        BorrowerDetailVO borrowerDetailVO = borrowerService.getBorrowerDetailVOById(id);
+        return R.ok().data("borrowerDetailVO",borrowerDetailVO);
     }
 }
