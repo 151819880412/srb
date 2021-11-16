@@ -1139,3 +1139,9 @@ com.aliyun.oss.OSSException: The OSS Access Key Id you provided does not exist i
 2021-11-09 09:06:58 [INFO ] main StartupInfoLogger.java:61 com.atguigu.srb.gateway.ServiceGatewayApplication Started ServiceGatewayApplication in 18.787 seconds (JVM running for 36.743)
 2021-11-09 09:07:06 [INFO ] main StartupInfoLogger.java:61 com.atguigu.srb.sms.ServiceSmsApplication Started ServiceSmsApplication in 15.963 seconds (JVM running for 29.449)
 2021-11-09 09:07:06 [INFO ] main StartupInfoLogger.java:61 com.atguigu.srb.oss.ServiceOssApplication Started ServiceOssApplication in 20.353 seconds (JVM running for 39.388)
+2021-11-16 12:46:30 [INFO ] main SpringApplication.java:655 com.atguigu.srb.sms.ServiceSmsApplication The following profiles are active: dev
+2021-11-16 12:46:34 [INFO ] main SpringApplication.java:655 com.atguigu.srb.gateway.ServiceGatewayApplication The following profiles are active: dev
+2021-11-16 12:46:39 [INFO ] main SpringApplication.java:655 com.atguigu.srb.oss.ServiceOssApplication The following profiles are active: dev
+2021-11-16 12:46:46 [INFO ] main StartupInfoLogger.java:61 com.atguigu.srb.sms.ServiceSmsApplication Started ServiceSmsApplication in 23.645 seconds (JVM running for 47.857)
+2021-11-16 12:46:46 [INFO ] main StartupInfoLogger.java:61 com.atguigu.srb.gateway.ServiceGatewayApplication Started ServiceGatewayApplication in 17.364 seconds (JVM running for 36.938)
+2021-11-16 12:46:50 [INFO ] main StartupInfoLogger.java:61 com.atguigu.srb.oss.ServiceOssApplication Started ServiceOssApplication in 17.058 seconds (JVM running for 31.855)
