@@ -13,6 +13,7 @@ import com.atguigu.srb.core.mapper.BorrowInfoMapper;
 import com.atguigu.srb.core.pojo.entity.IntegralGrade;
 import com.atguigu.srb.core.pojo.entity.UserInfo;
 import com.atguigu.srb.core.service.BorrowInfoService;
+import com.atguigu.srb.core.service.DictService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,9 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
 
     @Resource
     private IntegralGradeMapper integralGradeMapper;
+
+    @Resource
+    private DictService dictService;
 
     @Override
     public BigDecimal getBorrowAmount(Long userId) {
@@ -106,5 +110,24 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
 
         Integer status = (Integer)objects.get(0);
         return status;
+    }
+
+    @Override
+    public List<BorrowInfo> selectList() {
+
+        List<BorrowInfo> borrowInfoList = baseMapper.selectBorrowInfoList();
+        borrowInfoList.forEach(borrowInfo -> {
+            String returnMethod = dictService.getNameByParentDictCodeAndValue("returnMethod", borrowInfo.getReturnMethod());
+            String moneyUse = dictService.getNameByParentDictCodeAndValue("moneyUse", borrowInfo.getMoneyUse());
+            // 下拉框转字符串
+            String status = BorrowInfoStatusEnum.getMsgByStatus(borrowInfo.getStatus());
+
+            borrowInfo.getParam().put("returnMethod",returnMethod);
+            borrowInfo.getParam().put("moneyUse",moneyUse);
+            borrowInfo.getParam().put("status",status);
+        });
+
+        return borrowInfoList;
+
     }
 }
